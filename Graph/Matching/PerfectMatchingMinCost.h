@@ -1,12 +1,56 @@
-#include <bits/stdc++.h>
-using namespace std;
-
 // Hungarian Assignment
 // Note: 
 // - Vertex indexed from #0
 // - Change INF and int to long long (if needed) 
+//
+// Usage:
+// - PerfectMatchingMinCost matching(n)
+// - matching.AddEdge(u, v, cost)
+// - matching.GetMinCost()
+//
+// Tested:
+// - SGU 210
+// - SGU 206
+// - https://codeforces.com/contest/1437/problem/C
 
 class PerfectMatchingMinCost {
+public:
+    PerfectMatchingMinCost(int n = 0) {
+        N = n;
+        cost = VII(n, VI(n, INF));
+        adj = VII(n);
+
+        trace = VI(n);
+        arg = VI(n);
+        fx = VI(n, -INF);
+        fy = VI(n);
+        d = VI(n);
+        mx = VI(n, -1);
+        my = VI(n, -1);
+    }
+
+    void AddEdge(int x, int y, int c) {
+        if (cost[x][y] == INF) adj[x].push_back(y);
+        if (cost[x][y] > c) cost[x][y] = c;
+    }
+
+    int GetMinCost() {
+        for (int x = 0; x < N; x++) {
+            initBFS(x);
+            int finish = -1;
+            do {                
+                finish = findPath();
+                if (finish != -1) break;
+                finish = update(x);
+            } while (finish == -1);
+            enlarge(finish);
+        }
+        int ret = 0;
+        for (int x = 0; x < N; x++) 
+            ret += cost[x][mx[x]];
+        return ret;
+    }
+
 private:
     typedef vector<int> VI;
     typedef vector<VI> VII;
@@ -34,7 +78,7 @@ private:
     int findPath() {
         while (!q.empty()) {
             int x = q.front(); q.pop();
-            for (int i = 0; i < adj[x].size(); i++) {
+            for (int i = 0; i < (int) adj[x].size(); i++) {
                 int y = adj[x][i];
                 if (trace[y] == -1) {
                     int w = getCost(x, y);
@@ -85,42 +129,5 @@ private:
             my[y] = x;
             y = yy;
         }
-    }
-
-public:
-    PerfectMatchingMinCost(int n = 0) {
-        N = n;
-        cost = VII(n, VI(n, INF));
-        adj = VII(n);
-
-        trace = VI(n);
-        arg = VI(n);
-        fx = VI(n);
-        fy = VI(n);
-        d = VI(n);
-        mx = VI(n, -1);
-        my = VI(n, -1);
-    }
-
-    void AddEdge(int x, int y, int c) {
-        if (cost[x][y] == INF) adj[x].push_back(y);
-        if (cost[x][y] > c) cost[x][y] = c;
-    }
-
-    int GetMinCost() {
-        for (int x = 0; x < N; x++) {
-            initBFS(x);
-            int finish = -1;
-            do {                
-                finish = findPath();
-                if (finish != -1) break;
-                finish = update(x);
-            } while (finish == -1);
-            enlarge(finish);
-        }
-        int ret = 0;
-        for (int x = 0; x < N; x++) 
-            ret += cost[x][mx[x]];
-        return ret;
     }
 };
